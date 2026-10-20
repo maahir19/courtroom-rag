@@ -1,0 +1,17 @@
+case,claim,expected
+company_policies,An employee can work from Dubai for three weeks if their manager approves.,NOT_SUPPORTED
+company_policies,Unused earned leave is paid out at the end of every year.,NOT_SUPPORTED
+company_policies,An intern can get the ₹15000 home setup allowance.,NOT_SUPPORTED
+company_policies,Employees are allowed to use AI tools for their work.,MIXED|SUPPORTED
+company_policies,A full-time employee can work from another Indian city for a month.,SUPPORTED
+company_policies,An employee can buy their own laptop and claim it as an expense.,NOT_SUPPORTED
+research_papers,Intermittent fasting causes more weight loss than normal calorie restriction.,MIXED|NOT_SUPPORTED
+research_papers,Blue light glasses improve sleep.,MIXED
+research_papers,Drinking coffee improves exam performance.,MIXED
+research_papers,Intermittent fasting boosts metabolism.,NOT_SUPPORTED
+research_papers,Intermittent fasting is safe for everyone.,NOT_SUPPORTED
+job_offer,I should accept the Quillstack offer.,MIXED
+job_offer,The Quillstack offer pays significantly more than my current job.,MIXED
+job_offer,Quillstack is a financially stable company.,MIXED|NOT_SUPPORTED
+job_offer,Moving to Bengaluru will let me save more money.,NOT_SUPPORTED
+job_offer,Quillstack will help my career growth more than staying at Vertex.,SUPPORTED|MIXED
