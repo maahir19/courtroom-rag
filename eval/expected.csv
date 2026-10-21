@@ -15,3 +15,15 @@ job_offer,The Quillstack offer pays significantly more than my current job.,MIXE
 job_offer,Quillstack is a financially stable company.,MIXED|NOT_SUPPORTED
 job_offer,Moving to Bengaluru will let me save more money.,NOT_SUPPORTED
 job_offer,Quillstack will help my career growth more than staying at Vertex.,SUPPORTED|MIXED
+apple_policies,Apple employees can create and sell their own apps on the App Store.,NOT_SUPPORTED
+apple_policies,Apple employees can report concerns anonymously.,SUPPORTED|MIXED
+apple_policies,An Apple employee can join the board of a local sports club without approval.,MIXED|SUPPORTED
+apple_policies,Personal use of Apple equipment by employees is private.,NOT_SUPPORTED
+apple_policies,Apple makes political contributions to individual candidates.,NOT_SUPPORTED
+apple_policies,Contractors are protected under Apple's whistleblowing policy.,SUPPORTED
+reliance_governance,Reliance must pay a dividend to shareholders every year.,NOT_SUPPORTED
+reliance_governance,All related party transactions of Reliance must be at arm's length.,MIXED
+reliance_governance,Non-executive directors of Reliance are paid only sitting fees.,NOT_SUPPORTED
+reliance_governance,A whistle-blower can report directly to the Chairman of the Audit Committee.,SUPPORTED|MIXED
+reliance_governance,An employee who makes a deliberately false whistle-blower complaint is protected from action.,NOT_SUPPORTED
+reliance_governance,A subsidiary is material if it contributes more than ten percent of consolidated turnover.,SUPPORTED|MIXED

@@ -34,7 +34,18 @@ flowchart LR
     K2 --> V[Verdict + reasons]
 ```
 
-## Sample case files (included)
+## Case files (included)
+
+Two case files use **real, publicly published policy PDFs**:
+
+| Case file | Docs | Good claims to try |
+|---|---|---|
+| `apple_policies` | Apple's Business Conduct, Global Whistleblowing, Human Rights and Antitrust policies | *"Apple employees can create and sell their own apps on the App Store."* |
+| `reliance_governance` | 8 Reliance Industries governance policies: dividends, related party transactions, directors' selection and pay, whistle-blower, material subsidiaries, disclosures, debentures | *"Reliance must pay a dividend to shareholders every year."* |
+
+Real PDFs needed extra cleaning in `ingest.py`: lines broken mid-sentence get glued back into paragraphs, table-of-contents dot leaders are removed, ALL-CAPS lines become section headings, and headers/footers that repeat on every page are dropped.
+
+### Synthetic case files
 
 I wrote three sets of **synthetic** documents so it works out of the box. All companies, people, papers and numbers are made up.
 
@@ -116,7 +127,7 @@ I did try `sentence-transformers` embeddings. They work, but with torch it's a ~
 
 ## Evaluation
 
-`eval/expected.csv` has 16 claims with the verdict I think is correct after reading the docs (a few accept two answers because they're genuinely debatable).
+`eval/expected.csv` has 28 claims (16 on the synthetic case files, 12 on the real Apple and Reliance policies) with the verdict I think is correct after reading the docs (a few accept two answers because they're genuinely debatable).
 
 ```bash
 python eval/run_eval.py
@@ -124,7 +135,7 @@ python eval/run_eval.py
 
 | Mode | Correct |
 |---|---|
-| Offline (rule-based) | 8 / 16 (50%) |
+| Offline (rule-based) | 13 / 28 (46%) |
 | Groq gpt-oss-120b | _run it and fill this in_ |
 
 The offline judge is biased towards `NOT_SUPPORTED`. Negation words are strong signals in policies, but in research papers they show up everywhere ("no significant difference in secondary outcomes") even when the main result is positive. That's basically the whole argument for using an LLM.

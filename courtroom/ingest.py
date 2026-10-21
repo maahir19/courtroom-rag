@@ -13,6 +13,7 @@ from pathlib import Path
 from . import config
 
 SUPPORTED = {".md", ".txt", ".pdf"}
+NOT_EVIDENCE = {"claims.txt", "sources.md", "readme.md"}  # helper files that live next to the docs
 
 
 @dataclass
@@ -32,8 +33,63 @@ def read_file(path: Path) -> str:
         from pypdf import PdfReader  # only import when needed, it's slow-ish
 
         reader = PdfReader(str(path))
-        return "\n\n".join((p.extract_text() or "") for p in reader.pages)
+        pages = [(p.extract_text() or "") for p in reader.pages]
+        # headers/footers repeat on every page ("Regd. Office: ...", "COMPANY | POLICY NAME").
+        # a line that shows up on half the pages or more is page furniture, not content
+        from collections import Counter
+        seen = Counter(ln.strip() for pg in pages for ln in set(pg.split("\n")) if len(ln.strip()) > 15)
+        limit = max(2, len(pages) // 2)
+        repeated = {ln for ln, n in seen.items() if n >= limit} if len(pages) >= 3 else set()
+        raw = "\n".join(ln for pg in pages for ln in pg.split("\n") if ln.strip() not in repeated)
+        raw = re.sub(r"_{3,}", " ", raw)  # blank lines in forms: "Name: ________"
+        title = path.stem.replace("_", " ").replace("-", " ").strip()
+        title = re.sub(r"^\d+\s+", "", title)
+        return f"# {title[:1].upper() + title[1:]}\n\n" + pdf_to_markdown(raw)
     return path.read_text(encoding="utf-8", errors="ignore")
+
+
+_NUMBERED = re.compile(r"^(\d+(\.\d+)*\.?\s|[•●▪◦\-–]\s|\(?[a-z]\)\s|\(?[ivx]+\)\s)")
+
+
+def pdf_to_markdown(raw: str) -> str:
+    """Real PDFs break lines mid-sentence and have tables of contents full of dot
+    leaders ("1. Introduction.......02"). This glues lines back into paragraphs and
+    turns short ALL-CAPS lines into headings so chunks keep their section name.
+    Found this the hard way when the Reliance policies came out as one giant blob."""
+    lines = []
+    for ln in raw.split("\n"):
+        ln = re.sub(r"(\.\s?){4,}\s*\d*", " ", ln)          # dot leaders in contents pages
+        ln = re.sub(r"\s+", " ", ln).strip()
+        if not ln or re.fullmatch(r"(page\s*)?\d+(\s*of\s*\d+)?", ln, flags=re.I):
+            continue
+        lines.append(ln)
+
+    out, para = [], []
+
+    def flush():
+        if para:
+            out.append(" ".join(para))
+            para.clear()
+
+    for ln in lines:
+        letters = [c for c in ln if c.isalpha()]
+        is_heading = (len(ln.split()) <= 9 and len(letters) >= 4
+                      and sum(c.isupper() for c in letters) / len(letters) > 0.8
+                      and not ln.endswith((".", ",", ";")))
+        if is_heading:
+            flush()
+            out.append("## " + re.sub(r"\d+$", "", ln).strip().title())
+            continue
+        starts_new = bool(_NUMBERED.match(ln)) or (para and para[-1].endswith((".", ":", ";")) and ln[:1].isupper())
+        if starts_new:
+            flush()
+        # words split across lines with a hyphen: "employ-" + "ees"
+        if para and para[-1].endswith("-") and ln[:1].islower():
+            para[-1] = para[-1][:-1] + ln
+        else:
+            para.append(ln)
+    flush()
+    return "\n\n".join(out)
 
 
 def _clean(text: str) -> str:
@@ -99,7 +155,7 @@ def load_collection(folder: Path) -> list[Chunk]:
     out: list[Chunk] = []
     n = 0
     for f in files:
-        if f.name == "claims.txt":  # sample claims, not evidence
+        if f.name.lower() in NOT_EVIDENCE:  # sample claims / source notes, not evidence
             continue
         raw = _clean(read_file(f))
         if not raw:
@@ -137,7 +193,7 @@ def list_collections() -> list[dict]:
 
 def _describe(d: Path, key: str) -> dict:
     docs = [f.name for f in sorted(d.rglob("*"))
-            if f.is_file() and f.suffix.lower() in SUPPORTED and f.name != "claims.txt"]
+            if f.is_file() and f.suffix.lower() in SUPPORTED and f.name.lower() not in NOT_EVIDENCE]
     claims_file = d / "claims.txt"
     claims = []
     if claims_file.exists():
