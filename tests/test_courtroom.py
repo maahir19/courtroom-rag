@@ -89,7 +89,7 @@ def test_full_trial_with_fake_llm(monkeypatch):
 
 
 def test_offline_trial_runs_for_every_sample_claim():
-    for case in ("company_policies", "research_papers", "job_offer"):
+    for case in ("company_policies", "job_offer", "apple_policies", "reliance_governance"):
         claims = (config.DATA_DIR / case / "claims.txt").read_text().splitlines()
         for c in claims[:2]:
             types = [e["type"] for e in run_trial(c, case)]

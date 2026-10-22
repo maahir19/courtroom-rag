@@ -10,7 +10,7 @@ Third-year mini project (B.Tech CSE, Sem 5/6). I wanted to understand RAG proper
 
 ## What it does
 
-You give it a **claim** and a **folder of documents** (company policies, research papers, or even your own "should I take this job offer" notes).
+You give it a **claim** and a **folder of documents** (company policies, governance documents, or even your own "should I take this job offer" notes).
 
 1. **Discovery.** The Prosecution (argues the claim is TRUE) and the Defense (argues it's FALSE) each search the *same* documents. Their searches are slightly biased towards their own side (more on that below).
 2. **Opening arguments.** Each side makes 2–4 points. Every point has to cite exhibit ids like `E12`.
@@ -47,12 +47,11 @@ Real PDFs needed extra cleaning in `ingest.py`: lines broken mid-sentence get gl
 
 ### Synthetic case files
 
-I wrote three sets of **synthetic** documents so it works out of the box. All companies, people, papers and numbers are made up.
+I wrote two sets of **synthetic** documents so it works out of the box. All companies, people and numbers are made up.
 
 | Case file | Docs | Good claims to try |
 |---|---|---|
 | `company_policies` | remote work, leave, expenses, infosec, a Slack FAQ for a fake company "Nimbus Labs" | *"An employee can work from Dubai for three weeks if their manager approves."* |
-| `research_papers` | fasting RCT + meta-analysis, blue-light glasses trial + review, caffeine & exams cohort | *"Blue light glasses improve sleep."* |
 | `job_offer` | offer letter, my notes, current job, company research, budget comparison | *"I should accept the Quillstack offer."* |
 
 The docs are written so that the claims are actually debatable. For example, the FAQ says "yes" to working from another city, but the policy has a 14-day limit for working abroad. Both lawyers have real ammunition.
@@ -127,7 +126,7 @@ I did try `sentence-transformers` embeddings. They work, but with torch it's a ~
 
 ## Evaluation
 
-`eval/expected.csv` has 28 claims (16 on the synthetic case files, 12 on the real Apple and Reliance policies) with the verdict I think is correct after reading the docs (a few accept two answers because they're genuinely debatable).
+`eval/expected.csv` has 23 claims (11 on the synthetic case files, 12 on the real Apple and Reliance policies) with the verdict I think is correct after reading the docs (a few accept two answers because they're genuinely debatable).
 
 ```bash
 python eval/run_eval.py
@@ -135,10 +134,10 @@ python eval/run_eval.py
 
 | Mode | Correct |
 |---|---|
-| Offline (rule-based) | 13 / 28 (46%) |
+| Offline (rule-based) | 11 / 23 (48%) |
 | Groq gpt-oss-120b | _run it and fill this in_ |
 
-The offline judge is biased towards `NOT_SUPPORTED`. Negation words are strong signals in policies, but in research papers they show up everywhere ("no significant difference in secondary outcomes") even when the main result is positive. That's basically the whole argument for using an LLM.
+The offline judge is biased towards `NOT_SUPPORTED`. Negation words are strong signals in policies, but they also appear in sentences that don't decide the question ("may not declare dividend *if*…", "except in exceptional circumstances"), so keyword rules miss conditions and exceptions. That's basically the whole argument for using an LLM.
 
 Tests: `pytest -q` (8 tests). They include a fake LLM that invents exhibit `E777`, to check that the clerk strikes it and the judge can't use it.
 
